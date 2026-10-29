@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4단계 영상 만들기 웹앱</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Jua for friendly UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', 'Jua', sans-serif; }
+        .jua-font { font-family: 'Jua', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- 상단 헤더 -->
+    <header class="bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white text-orange-500 p-2.5 rounded-2xl shadow-inner font-bold text-xl">
+                <i class="fa-solid fa-clapperboard"></i>
+            </div>
+            <div>
+                <h1 class="jua-font text-2xl tracking-wide">쉬운 영상 만들기 스튜디오</h1>
+                <p class="text-xs text-orange-100">4단계로 완성하는 나만의 멋진 비디오</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="resetProject()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-xl text-sm font-medium transition flex items-center space-x-1">
+                <i class="fa-solid fa-rotate-right text-xs"></i><span>처음부터</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 컨테이너 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
+
+        <!-- 4단계 스텝 탭 버튼들 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onclick="switchStep(1)" id="tab-1" class="step-tab bg-white border-2 border-amber-400 p-4 rounded-2xl shadow-sm text-left transition relative overflow-hidden group">
+                <div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">1</div>
+                <span class="text-xs font-semibold text-amber-600 block mb-1">1단계</span>
+                <h3 class="jua-font text-lg text-slate-800">영상·사진 넣기</h3>
+                <p class="text-xs text-slate-500 mt-1 truncate">파일 고르기·시간 조절</p>
+            </button>
+
+            <button onclick="switchStep(2)" id="tab-2" class="step-tab bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-sm text-left transition relative overflow-hidden group opacity-70 hover:opacity-100">
+                <div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">2</div>
+                <span class="text-xs font-semibold text-amber-600 block mb-1">2단계</span>
+                <h3 class="jua-font text-lg text-slate-800">음악 넣기</h3>
+                <p class="text-xs text-slate-500 mt-1 truncate">내 노래 추가 및 볼륨 조절</p>
+            </button>
+
+            <button onclick="switchStep(3)" id="tab-3" class="step-tab bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-sm text-left transition relative overflow-hidden group opacity-70 hover:opacity-100">
+                <div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">3</div>
+                <span class="text-xs font-semibold text-amber-600 block mb-1">3단계</span>
+                <h3 class="jua-font text-lg text-slate-800">자막 넣기</h3>
+                <p class="text-xs text-slate-500 mt-1 truncate">장면별 자막 및 위치</p>
+            </button>
+
+            <button onclick="switchStep(4)" id="tab-4" class="step-tab bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-sm text-left transition relative overflow-hidden group opacity-70 hover:opacity-100">
+                <div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">4</div>
+                <span class="text-xs font-semibold text-amber-600 block mb-1">4단계</span>
+                <h3 class="jua-font text-lg text-slate-800">MP4 만들기</h3>
+                <p class="text-xs text-slate-500 mt-1 truncate">미리보기 및 저장하기</p>
+            </button>
+        </div>
+
+        <!-- 컨텐츠 영역 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+            
+            <!-- 좌측 컨트롤 패널 -->
+            <div class="lg:col-span-5 bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col min-h-[500px]">
+                
+                <!-- 1단계 패널 -->
+                <div id="panel-1" class="step-panel flex flex-col flex-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="jua-font text-xl text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-images text-amber-500"></i> 영상 및 사진 선택
+                        </h2>
+                        <span class="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium" id="media-count">0개 선택됨</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">사진이나 영상을 추가해 주세요. 사진은 3초, 5초, 10초 또는 노래 길이만큼 재생되도록 설정할 수 있어요.</p>
+                    
+                    <label class="border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/50 hover:bg-amber-50 transition rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer mb-6 text-center">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xl mb-2 shadow-inner">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <span class="jua-font text-base text-slate-700">클릭하여 사진/영상 추가하기</span>
+                        <span class="text-xs text-slate-400 mt-1">JPG, PNG, MP4 파일 지원</span>
+                        <input type="file" id="media-file-input" multiple accept="image/*,video/*" class="hidden" onchange="handleFiles(this)">
+                    </label>
+
+                    <div class="flex-1 overflow-y-auto max-h-[280px] space-y-3 pr-1" id="media-list-container">
+                        <div class="text-center text-slate-400 py-12 text-sm" id="empty-media-msg">
+                            <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                            아직 추가된 사진이나 영상이 없어요.
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                        <button onclick="switchStep(2)" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition flex items-center gap-2">
+                            다음 단계로 <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2단계 패널 -->
+                <div id="panel-2" class="step-panel hidden flex flex-col flex-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="jua-font text-xl text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-music text-amber-500"></i> 음악 및 사운드 설정
+                        </h2>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">기본 배경음악을 선택하거나 내 컴퓨터의 노래 파일(MP3 등)을 직접 추가해 보세요.</p>
+
+                    <!-- 내 노래 추가하기 업로드 -->
+                    <div class="mb-4 bg-amber-50/60 p-3 rounded-2xl border border-amber-200">
+                        <label class="flex items-center justify-center gap-2 w-full bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 rounded-xl p-2.5 cursor-pointer transition text-sm font-semibold shadow-sm">
+                            <i class="fa-solid fa-file-audio text-amber-600"></i> 내 컴퓨터에서 노래 파일 추가하기 (MP3)
+                            <input type="file" id="custom-music-input" accept="audio/*" class="hidden" onchange="handleCustomMusic(this)">
+                        </label>
+                        <div id="custom-music-info" class="text-xs text-slate-600 mt-2 text-center hidden">
+                            선택된 내 노래: <span id="custom-music-name" class="font-bold text-amber-700"></span>
+                            <button onclick="removeCustomMusic()" class="ml-2 text-rose-500 hover:underline"><i class="fa-solid fa-xmark"></i> 제거</button>
+                        </div>
+                    </div>
+
+                    <!-- 음악 선택 라디오 카드 -->
+                    <div class="space-y-2.5 mb-4" id="music-list">
+                        <label class="flex items-center justify-between p-3 rounded-xl border-2 border-amber-400 bg-amber-50/50 cursor-pointer transition">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="bgm" value="upbeat" checked class="text-amber-500 focus:ring-amber-400" onchange="updateBgm(this)">
+                                <div>
+                                    <p class="font-bold text-xs text-slate-800">밝고 경쾌한 브이로그 (Upbeat)</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="previewBgm('upbeat', event)" class="w-7 h-7 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center text-xs hover:bg-amber-300">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 hover:border-slate-300 cursor-pointer transition">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="bgm" value="lofi" class="text-amber-500 focus:ring-amber-400" onchange="updateBgm(this)">
+                                <div>
+                                    <p class="font-bold text-xs text-slate-800">차분한 로파이 힐링 (Lofi)</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="previewBgm('lofi', event)" class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 hover:border-slate-300 cursor-pointer transition">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="bgm" value="epic" class="text-amber-500 focus:ring-amber-400" onchange="updateBgm(this)">
+                                <div>
+                                    <p class="font-bold text-xs text-slate-800">웅장한 시네마틱 (Epic)</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="previewBgm('epic', event)" class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 hover:border-slate-300 cursor-pointer transition">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="bgm" value="none" class="text-amber-500 focus:ring-amber-400" onchange="updateBgm(this)">
+                                <div>
+                                    <p class="font-bold text-xs text-slate-800">음악 없음 (원본 소리만)</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- 볼륨 조절 슬라이더 -->
+                    <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 mb-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                                <span>배경 음악 크기</span>
+                                <span id="bgm-vol-val">70%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="70" class="w-full accent-amber-500 cursor-pointer" oninput="changeVolume('bgm', this.value)">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                                <span>영상 원본 소리 크기</span>
+                                <span id="vid-vol-val">100%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="100" class="w-full accent-amber-500 cursor-pointer" oninput="changeVolume('video', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-t border-slate-100 flex justify-between">
+                        <button onclick="switchStep(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-medium transition">
+                            <i class="fa-solid fa-arrow-left text-xs"></i> 이전
+                        </button>
+                        <button onclick="switchStep(3)" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition flex items-center gap-2">
+                            다음 단계로 <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3단계 패널 -->
+                <div id="panel-3" class="step-panel hidden flex flex-col flex-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="jua-font text-xl text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-closed-captioning text-amber-500"></i> 자막 넣기
+                        </h2>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">각 장면마다 들어갈 자막을 입력하고 글자 크기와 위치를 정해 보세요.</p>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">적용할 장면 선택</label>
+                            <select id="subtitle-scene-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-amber-400 outline-none" onchange="loadSubtitleForScene(this.value)">
+                                <option value="0">영상이 없습니다</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">자막 내용</label>
+                            <input type="text" id="subtitle-input" placeholder="예: 즐거운 우리들의 시간 ✨" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-amber-400 outline-none" oninput="saveCurrentSubtitle(this.value)">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">글자 크기</label>
+                                <select id="subtitle-size" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-amber-400 outline-none" onchange="updateSubtitleStyle()">
+                                    <option value="20px">작게 (20px)</option>
+                                    <option value="28px" selected>보통 (28px)</option>
+                                    <option value="38px">크게 (38px)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">화면 위치</label>
+                                <select id="subtitle-pos" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-amber-400 outline-none" onchange="updateSubtitleStyle()">
+                                    <option value="bottom" selected>아래쪽</option>
+                                    <option value="center">가운데</option>
+                                    <option value="top">위쪽</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">글자 효과</label>
+                            <div class="flex gap-4 pt-1">
+                                <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                                    <input type="checkbox" id="effect-fade" checked class="rounded text-amber-500 focus:ring-amber-400" onchange="updateSubtitleStyle()">
+                                    <span>페이드인</span>
+                                </label>
+                                <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                                    <input type="checkbox" id="effect-shadow" checked class="rounded text-amber-500 focus:ring-amber-400" onchange="updateSubtitleStyle()">
+                                    <span>그림자</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-4 border-t border-slate-100 flex justify-between">
+                        <button onclick="switchStep(2)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-medium transition">
+                            <i class="fa-solid fa-arrow-left text-xs"></i> 이전
+                        </button>
+                        <button onclick="switchStep(4)" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition flex items-center gap-2">
+                            다음 단계로 <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4단계 패널 -->
+                <div id="panel-4" class="step-panel hidden flex flex-col flex-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="jua-font text-xl text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-play text-amber-500"></i> MP4로 만들기 & 저장
+                        </h2>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">모든 설정이 완료되었습니다! 미리보기를 통해 확인하고 내 컴퓨터에 비디오 파일로 저장하세요.</p>
+
+                    <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 mb-6 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">총 장면 수:</span>
+                            <span class="font-bold text-slate-800" id="summary-count">0개</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">예상 총 재생 시간:</span>
+                            <span class="font-bold text-slate-800" id="summary-duration">0초</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">선택한 배경 음악:</span>
+                            <span class="font-bold text-amber-600" id="summary-bgm">밝고 경쾌한 브이로그</span>
+                        </div>
+                    </div>
+
+                    <div id="export-progress-box" class="hidden space-y-2 mb-4 bg-slate-100 p-4 rounded-2xl">
+                        <div class="flex justify-between text-xs font-semibold text-slate-700">
+                            <span id="export-status-text">동영상 녹화 및 변환 중...</span>
+                            <span id="export-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                            <div id="export-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mt-auto">
+                        <button onclick="startExport()" id="export-btn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-base">
+                            <i class="fa-solid fa-download"></i> 내 컴퓨터에 동영상(MP4/WebM) 저장하기
+                        </button>
+                        <button onclick="switchStep(1)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition text-sm">
+                            처음으로 돌아가기
+                        </button>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-start">
+                        <button onclick="switchStep(3)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-medium transition">
+                            <i class="fa-solid fa-arrow-left text-xs"></i> 이전
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 우측 미리보기 캔버스 -->
+            <div class="lg:col-span-7 bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <h3 class="jua-font text-lg text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-tv text-amber-500"></i> 실시간 비디오 미리보기
+                    </h3>
+                    <div class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600" id="preview-time-display">00:00 / 00:00</div>
+                </div>
+
+                <div class="relative w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center group mb-4">
+                    <canvas id="preview-canvas" class="w-full h-full object-contain"></canvas>
+                    
+                    <div id="preview-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 text-white p-4 text-center">
+                        <div class="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-3 border border-amber-500/30">
+                            <i class="fa-solid fa-film"></i>
+                        </div>
+                        <p class="jua-font text-lg">영상을 추가해 주세요</p>
+                        <p class="text-xs text-slate-400 mt-1">1단계에서 사진이나 영상을 추가하면 미리보기가 활성화됩니다.</p>
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center gap-4">
+                    <button onclick="togglePlay()" id="play-pause-btn" class="w-11 h-11 rounded-xl bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-play" id="play-icon"></i>
+                    </button>
+                    
+                    <div class="flex-1 flex flex-col">
+                        <input type="range" id="timeline-scrubber" min="0" max="100" value="0" class="w-full accent-amber-500 cursor-pointer" oninput="scrubTimeline(this.value)" disabled>
+                    </div>
+
+                    <button onclick="restartPreview()" id="restart-btn" class="w-10 h-10 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 모달 -->
+    <div id="modal-alert" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-xl">
+            <div id="modal-icon" class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="jua-font text-xl text-slate-800 mb-2" id="modal-title">알림</h3>
+            <p class="text-sm text-slate-600 mb-6" id="modal-desc">메시지 내용</p>
+            <button onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition">확인</button>
+        </div>
+    </div>
+
+    <!-- 스크립트 로직 -->
+    <script>
+        let project = {
+            mediaList: [], 
+            bgm: 'upbeat',
+            customMusicUrl: null,
+            customMusicName: null,
+            customMusicDuration: 10, // 기본 노래 길이 10초
+            bgmVolume: 0.7,
+            videoVolume: 1.0,
+            currentSceneIndex: 0
+        };
+
+        let isPlaying = false;
+        let currentTime = 0;
+        let totalDuration = 0;
+        let animationFrameId = null;
+        let activeAudio = null;
+        let canvas, ctx;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('preview-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = 1280;
+            canvas.height = 720;
+            switchStep(1);
+        });
+
+        function switchStep(stepNumber) {
+            document.querySelectorAll('.step-panel').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`panel-${stepNumber}`).classList.remove('hidden');
+
+            document.querySelectorAll('.step-tab').forEach(el => {
+                el.classList.remove('border-amber-400', 'bg-white');
+                el.classList.add('border-slate-200', 'opacity-70');
+            });
+            const activeTab = document.getElementById(`tab-${stepNumber}`);
+            if (activeTab) {
+                activeTab.classList.remove('opacity-70', 'border-slate-200');
+                activeTab.classList.add('border-amber-400', 'bg-white');
+            }
+
+            if (stepNumber === 3) updateSceneSelectOptions();
+            if (stepNumber === 4) updateSummaryInfo();
+        }
+
+        function handleFiles(input) {
+            const files = Array.from(input.files);
+            if (files.length === 0) return;
+
+            files.forEach(file => {
+                const isVideo = file.type.startsWith('video');
+                const url = URL.createObjectURL(file);
+                
+                let mediaObj = {
+                    id: 'media_' + Math.random().toString(36).substr(2, 9),
+                    type: isVideo ? 'video' : 'image',
+                    url: url,
+                    file: file,
+                    duration: 3, // 기본 3초
+                    subtitle: '',
+                    subSize: '28px',
+                    subPos: 'bottom',
+                    fade: true,
+                    shadow: true,
+                    videoEl: null
+                };
+
+                if (isVideo) {
+                    const v = document.createElement('video');
+                    v.src = url;
+                    v.muted = true;
+                    v.onloadedmetadata = () => {
+                        mediaObj.duration = Math.min(Math.max(Math.round(v.duration), 2), 15);
+                        renderMediaList();
+                        recalculateDuration();
+                    };
+                    mediaObj.videoEl = v;
+                }
+
+                project.mediaList.push(mediaObj);
+            });
+
+            input.value = '';
+            renderMediaList();
+            recalculateDuration();
+        }
+
+        // 2단계 내 노래 파일 업로드 핸들러
+        function handleCustomMusic(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (project.customMusicUrl) {
+                URL.revokeObjectURL(project.customMusicUrl);
+            }
+
+            const url = URL.createObjectURL(file);
+            project.customMusicUrl = url;
+            project.customMusicName = file.name;
+            project.bgm = 'custom';
+
+            // 오디오 실제 길이를 측정하여 노래 길이만큼 옵션에 반영
+            const audioCheck = document.createElement('audio');
+            audioCheck.src = url;
+            audioCheck.onloadedmetadata = () => {
+                if (audioCheck.duration && !isNaN(audioCheck.duration) && audioCheck.duration !== Infinity) {
+                    project.customMusicDuration = Math.round(audioCheck.duration);
+                } else {
+                    project.customMusicDuration = 10;
+                }
+                recalculateDuration();
+                updateSummaryInfo();
+            };
+
+            document.querySelectorAll('input[name="bgm"]').forEach(r => r.checked = false);
+            const musicInfoEl = document.getElementById('custom-music-info');
+            if (musicInfoEl) musicInfoEl.classList.remove('hidden');
+            const musicNameEl = document.getElementById('custom-music-name');
+            if (musicNameEl) musicNameEl.textContent = file.name;
+            
+            showModal('노래 추가 완료', `"${file.name}" 노래가 배경음악으로 설정되었습니다!`);
+            updateSummaryInfo();
+        }
+
+        function removeCustomMusic() {
+            project.customMusicUrl = null;
+            project.customMusicName = null;
+            project.customMusicDuration = 10;
+            const musicInfoEl = document.getElementById('custom-music-info');
+            if (musicInfoEl) musicInfoEl.classList.add('hidden');
+            const musicInputEl = document.getElementById('custom-music-input');
+            if (musicInputEl) musicInputEl.value = '';
+            
+            const defaultRadio = document.querySelector('input[name="bgm"][value="upbeat"]');
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+                project.bgm = 'upbeat';
+            }
+            recalculateDuration();
+            updateSummaryInfo();
+        }
+
+        function renderMediaList() {
+            const container = document.getElementById('media-list-container');
+            const countBadge = document.getElementById('media-count');
+            const emptyMsg = document.getElementById('empty-media-msg');
+
+            if (!container) return;
+
+            if (countBadge) {
+                countBadge.textContent = `${project.mediaList.length}개 선택됨`;
+            }
+
+            if (project.mediaList.length === 0) {
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                container.innerHTML = '';
+                if (emptyMsg) container.appendChild(emptyMsg);
+                togglePreviewControls(false);
+                return;
+            }
+
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            container.innerHTML = '';
+
+            project.mediaList.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl p-3 gap-3 cursor-pointer hover:border-amber-400 transition";
+                div.onclick = (e) => {
+                    // 버튼 클릭이 아닌 영역을 클릭했을 때 해당 장치 선택 (3단계 자막 편집 등과 연동)
+                    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'I') {
+                        project.currentSceneIndex = index;
+                        switchStep(3);
+                        loadSubtitleForScene(index);
+                    }
+                };
+                
+                let thumbHtml = '';
+                if (item.type === 'image') {
+                    thumbHtml = `<img src="${item.url}" class="w-14 h-14 object-cover rounded-xl shadow-sm">`;
+                } else {
+                    thumbHtml = `<div class="w-14 h-14 bg-slate-800 text-white rounded-xl flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-video"></i></div>`;
+                }
+
+                let durationControlHtml = '';
+                if (item.type === 'image') {
+                    durationControlHtml = `
+                        <div class="flex items-center gap-1.5 mt-1" onclick="event.stopPropagation();">
+                            <span class="text-[11px] text-slate-500 font-medium">재생:</span>
+                            <select id="duration-select-${index}" onchange="changeMediaDuration(${index}, this.value)" class="bg-white border border-slate-200 rounded-lg text-xs py-0.5 px-1.5 outline-none font-semibold text-amber-700 cursor-pointer">
+                                <option value="3" ${item.duration === 3 ? 'selected' : ''}>3초</option>
+                                <option value="5" ${item.duration === 5 ? 'selected' : ''}>5초</option>
+                                <option value="10" ${item.duration === 10 ? 'selected' : ''}>10초</option>
+                                <option value="song" ${item.duration === 'song' ? 'selected' : ''}>노래 길이만큼</option>
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    durationControlHtml = `<div class="text-[11px] text-slate-400 mt-1">동영상 원본 길이 (${item.duration}초)</div>`;
+                }
+
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3 overflow-hidden flex-1">
+                        ${thumbHtml}
+                        <div class="truncate flex-1">
+                            <p class="font-bold text-xs text-slate-800 truncate">${item.type === 'image' ? '사진' : '동영상'} #${index + 1} ${index === project.currentSceneIndex ? '(선택됨)' : ''}</p>
+                            ${durationControlHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1 shrink-0" onclick="event.stopPropagation();">
+                        <button type="button" onclick="moveMedia(${index}, -1)" ${index === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-xs cursor-pointer"><i class="fa-solid fa-chevron-up pointer-events-none"></i></button>
+                        <button type="button" onclick="moveMedia(${index}, 1)" ${index === project.mediaList.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-xs cursor-pointer"><i class="fa-solid fa-chevron-down pointer-events-none"></i></button>
+                        <button type="button" onclick="removeMedia(${index})" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center text-xs ml-1 cursor-pointer"><i class="fa-solid fa-trash pointer-events-none"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            togglePreviewControls(true);
+            recalculateDuration();
+        }
+
+        function changeMediaDuration(index, val) {
+            if (val === 'song') {
+                project.mediaList[index].duration = 'song';
+            } else {
+                project.mediaList[index].duration = parseInt(val, 10);
+            }
+            recalculateDuration();
+        }
+
+        function moveMedia(index, direction) {
+            const target = index + direction;
+            if (target < 0 || target >= project.mediaList.length) return;
+            const temp = project.mediaList[index];
+            project.mediaList[index] = project.mediaList[target];
+            project.mediaList[target] = temp;
+            
+            if (project.currentSceneIndex === index) {
+                project.currentSceneIndex = target;
+            } else if (project.currentSceneIndex === target) {
+                project.currentSceneIndex = index;
+            }
+
+            renderMediaList();
+        }
+
+        function removeMedia(index) {
+            project.mediaList.splice(index, 1);
+            if (project.currentSceneIndex >= project.mediaList.length) {
+                project.currentSceneIndex = Math.max(0, project.mediaList.length - 1);
+            }
+            renderMediaList();
+            recalculateDuration();
+        }
+
+        function recalculateDuration() {
+            totalDuration = project.mediaList.reduce((acc, item) => {
+                if (item.duration === 'song') {
+                    return acc + project.customMusicDuration;
+                }
+                return acc + (typeof item.duration === 'number' ? item.duration : 3);
+            }, 0);
+            if (totalDuration === 0) totalDuration = 1;
+            drawCanvasFrame(0);
+        }
+
+        function togglePreviewControls(enable) {
+            const playBtn = document.getElementById('play-pause-btn');
+            const scrubber = document.getElementById('timeline-scrubber');
+            const restartBtn = document.getElementById('restart-btn');
+            const placeholder = document.getElementById('preview-placeholder');
+
+            if (playBtn) playBtn.disabled = !enable;
+            if (scrubber) scrubber.disabled = !enable;
+            if (restartBtn) restartBtn.disabled = !enable;
+
+            if (placeholder) {
+                placeholder.style.display = enable ? 'none' : 'flex';
+            }
+        }
+
+        function updateBgm(radio) {
+            project.bgm = radio.value;
+            updateSummaryInfo();
+        }
+
+        function changeVolume(type, val) {
+            const num = parseInt(val);
+            if (type === 'bgm') {
+                project.bgmVolume = num / 100;
+                const bgmValEl = document.getElementById('bgm-vol-val');
+                if (bgmValEl) bgmValEl.textContent = `${num}%`;
+            } else {
+                project.videoVolume = num / 100;
+                const vidValEl = document.getElementById('vid-vol-val');
+                if (vidValEl) vidValEl.textContent = `${num}%`;
+            }
+        }
+
+        function previewBgm(type, event) {
+            event.stopPropagation();
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio = null;
+            }
+            showModal('음악 미리듣기', `'${type}' 분위기의 배경음악을 재생합니다.`);
+        }
+
+        function updateSceneSelectOptions() {
+            const select = document.getElementById('subtitle-scene-select');
+            if (!select) return;
+            select.innerHTML = '';
+            if (project.mediaList.length === 0) {
+                select.innerHTML = '<option value="0">영상이 없습니다</option>';
+                const subInput = document.getElementById('subtitle-input');
+                if (subInput) subInput.value = '';
+                return;
+            }
+
+            project.mediaList.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `장면 #${index + 1} (${item.type === 'image' ? '사진' : '영상'})`;
+                select.appendChild(opt);
+            });
+
+            loadSubtitleForScene(0);
+        }
+
+        function loadSubtitleForScene(index) {
+            const item = project.mediaList[index];
+            if (!item) return;
+            project.currentSceneIndex = parseInt(index);
+            
+            const subInput = document.getElementById('subtitle-input');
+            const subSize = document.getElementById('subtitle-size');
+            const subPos = document.getElementById('subtitle-pos');
+            const effectFade = document.getElementById('effect-fade');
+            const effectShadow = document.getElementById('effect-shadow');
+
+            if (subInput) subInput.value = item.subtitle || '';
+            if (subSize) subSize.value = item.subSize || '28px';
+            if (subPos) subPos.value = item.subPos || 'bottom';
+            if (effectFade) effectFade.checked = item.fade !== false;
+            if (effectShadow) effectShadow.checked = item.shadow !== false;
+        }
+
+        function saveCurrentSubtitle(val) {
+            if (project.mediaList[project.currentSceneIndex]) {
+                project.mediaList[project.currentSceneIndex].subtitle = val;
+            }
+        }
+
+        function updateSubtitleStyle() {
+            const item = project.mediaList[project.currentSceneIndex];
+            if (!item) return;
+            const subSize = document.getElementById('subtitle-size');
+            const subPos = document.getElementById('subtitle-pos');
+            const effectFade = document.getElementById('effect-fade');
+            const effectShadow = document.getElementById('effect-shadow');
+
+            if (subSize) item.subSize = subSize.value;
+            if (subPos) item.subPos = subPos.value;
+            if (effectFade) item.fade = effectFade.checked;
+            if (effectShadow) item.shadow = effectShadow.checked;
+        }
+
+        function updateSummaryInfo() {
+            const countEl = document.getElementById('summary-count');
+            const durationEl = document.getElementById('summary-duration');
+            const bgmEl = document.getElementById('summary-bgm');
+
+            if (countEl) countEl.textContent = `${project.mediaList.length}개`;
+            if (durationEl) durationEl.textContent = `${totalDuration}초`;
+            
+            let bgmText = '음악 없음';
+            if (project.bgm === 'upbeat') bgmText = '밝고 경쾌한 브이로그';
+            else if (project.bgm === 'lofi') bgmText = '차분한 로파이 힐링';
+            else if (project.bgm === 'epic') bgmText = '웅장한 시네마틱';
+            else if (project.bgm === 'custom' && project.customMusicName) bgmText = `내 노래: ${project.customMusicName} (${project.customMusicDuration}초)`;
+
+            if (bgmEl) bgmEl.textContent = bgmText;
+        }
+
+        function drawCanvasFrame(time) {
+            if (!ctx) return;
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (project.mediaList.length === 0) return;
+
+            let accumulated = 0;
+            let currentItem = project.mediaList[0];
+            
+            for (let item of project.mediaList) {
+                let dur = item.duration === 'song' ? project.customMusicDuration : item.duration;
+                if (time >= accumulated && time <= accumulated + dur) {
+                    currentItem = item;
+                    break;
+                }
+                accumulated += dur;
+            }
+
+            if (currentItem) {
+                if (currentItem.type === 'image') {
+                    const img = new Image();
+                    img.src = currentItem.url;
+                    if (img.complete) {
+                        drawImageContain(img);
+                    } else {
+                        img.onload = () => drawImageContain(img);
+                    }
+                } else {
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 36px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('비디오 재생 중...', canvas.width / 2, canvas.height / 2);
+                }
+
+                if (currentItem.subtitle) {
+                    ctx.save();
+                    ctx.font = `bold ${currentItem.subSize} Jua, Inter`;
+                    ctx.fillStyle = '#ffffff';
+                    if (currentItem.shadow) {
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                    }
+                    ctx.textAlign = 'center';
+
+                    let yPos = canvas.height - 60;
+                    if (currentItem.subPos === 'center') yPos = canvas.height / 2;
+                    if (currentItem.subPos === 'top') yPos = 80;
+
+                    ctx.fillText(currentItem.subtitle, canvas.width / 2, yPos);
+                    ctx.restore();
+                }
+            }
+        }
+
+        function drawImageContain(img) {
+            const hRatio = canvas.width / img.width;
+            const vRatio = canvas.height / img.height;
+            const ratio = Math.min(hRatio, vRatio);
+            const centerShiftX = (canvas.width - img.width * ratio) / 2;
+            const centerShiftY = (canvas.height - img.height * ratio) / 2;
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+        }
+
+        function togglePlay() {
+            if (project.mediaList.length === 0) return;
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('play-icon');
+            
+            if (isPlaying) {
+                if (icon) icon.className = "fa-solid fa-pause";
+                playLoop();
+            } else {
+                if (icon) icon.className = "fa-solid fa-play";
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        function playLoop() {
+            if (!isPlaying) return;
+            currentTime += 0.05;
+            if (currentTime >= totalDuration) {
+                currentTime = 0;
+                isPlaying = false;
+                const icon = document.getElementById('play-icon');
+                if (icon) icon.className = "fa-solid fa-play";
+                cancelAnimationFrame(animationFrameId);
+                return;
+            }
+
+            updateTimelineUI();
+            drawCanvasFrame(currentTime);
+            animationFrameId = requestAnimationFrame(playLoop);
+        }
+
+        function updateTimelineUI() {
+            const scrubber = document.getElementById('timeline-scrubber');
+            const timeDisplay = document.getElementById('preview-time-display');
+            if (scrubber && totalDuration > 0) {
+                scrubber.value = (currentTime / totalDuration) * 100;
+            }
+            if (timeDisplay) {
+                const curMin = String(Math.floor(currentTime / 60)).padStart(2, '0');
+                const curSec = String(Math.floor(currentTime % 60)).padStart(2, '0');
+                const totMin = String(Math.floor(totalDuration / 60)).padStart(2, '0');
+                const totSec = String(Math.floor(totalDuration % 60)).padStart(2, '0');
+                timeDisplay.textContent = `${curMin}:${curSec} / ${totMin}:${totSec}`;
+            }
+        }
+
+        function scrubTimeline(val) {
+            if (totalDuration === 0) return;
+            currentTime = (val / 100) * totalDuration;
+            drawCanvasFrame(currentTime);
+            updateTimelineUI();
+        }
+
+        function restartPreview() {
+            currentTime = 0;
+            if (isPlaying) {
+                isPlaying = false;
+                const icon = document.getElementById('play-icon');
+                if (icon) icon.className = "fa-solid fa-play";
+                cancelAnimationFrame(animationFrameId);
+            }
+            drawCanvasFrame(0);
+            updateTimelineUI();
+        }
+
+        async function startExport() {
+            if (project.mediaList.length === 0) {
+                showModal('알림', '변환할 영상이나 사진이 없습니다.');
+                return;
+            }
+
+            const progressBox = document.getElementById('export-progress-box');
+            const exportBar = document.getElementById('export-bar');
+            const statusText = document.getElementById('export-status-text');
+            const percentText = document.getElementById('export-percent');
+            const exportBtn = document.getElementById('export-btn');
+
+            if (progressBox) progressBox.classList.remove('hidden');
+            if (exportBtn) exportBtn.disabled = true;
+
+            try {
+                // 오디오 소스가 있는 경우 Web Audio API로 믹싱
+                let audioCtx = null;
+                let audioDest = null;
+                let exportAudioEl = null;
+
+                if (project.customMusicUrl && project.bgm === 'custom') {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    audioDest = audioCtx.createMediaStreamDestination();
+                    exportAudioEl = new Audio(project.customMusicUrl);
+                    exportAudioEl.volume = project.bgmVolume;
+                    const sourceNode = audioCtx.createMediaElementSource(exportAudioEl);
+                    sourceNode.connect(audioDest);
+                    sourceNode.connect(audioCtx.destination);
+                }
+
+                // 캔버스 스트림 생성
+                const canvasStream = canvas.captureStream(30);
+                
+                // 비디오와 오디오 트랙 결합
+                const tracks = [...canvasStream.getVideoTracks()];
+                if (audioDest && audioDest.stream.getAudioTracks().length > 0) {
+                    tracks.push(audioDest.stream.getAudioTracks()[0]);
+                }
+
+                const combinedStream = new MediaStream(tracks);
+                let options = { mimeType: 'video/webm;codecs=vp9,opus' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: 'video/webm' };
+                }
+                
+                const mediaRecorder = new MediaRecorder(combinedStream, options);
+                let chunks = [];
+
+                mediaRecorder.ondataavailable = function(e) {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = function() {
+                    if (exportAudioEl) {
+                        exportAudioEl.pause();
+                        exportAudioEl = null;
+                    }
+                    if (audioCtx) {
+                        audioCtx.close();
+                    }
+
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'my_video_creation.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+
+                    if (progressBox) progressBox.classList.add('hidden');
+                    if (exportBtn) exportBtn.disabled = false;
+                    showModal('저장 완료', '내 컴퓨터 다운로드 폴더에 노래와 자막이 포함된 동영상 파일(.webm)이 정상적으로 저장되었습니다!');
+                };
+
+                mediaRecorder.start();
+                if (exportAudioEl) {
+                    exportAudioEl.currentTime = 0;
+                    exportAudioEl.play().catch(e => console.log(e));
+                }
+
+                currentTime = 0;
+                isPlaying = true;
+                let startTime = performance.now();
+                let durationMs = totalDuration * 1000;
+
+                function exportLoop(now) {
+                    let elapsed = (now - startTime);
+                    let progress = Math.min(Math.round((elapsed / durationMs) * 100), 100);
+
+                    if (exportBar) exportBar.style.width = `${progress}%`;
+                    if (percentText) percentText.textContent = `${progress}%`;
+
+                    if (elapsed < durationMs) {
+                        currentTime = (elapsed / 1000);
+                        drawCanvasFrame(currentTime);
+                        requestAnimationFrame(exportLoop);
+                    } else {
+                        isPlaying = false;
+                        mediaRecorder.stop();
+                    }
+                }
+
+                requestAnimationFrame(exportLoop);
+
+            } catch (err) {
+                console.error(err);
+                if (progressBox) progressBox.classList.add('hidden');
+                if (exportBtn) exportBtn.disabled = false;
+                showModal('안내', '브라우저 환경에 따라 내보내기 중 문제가 발생했습니다.');
+            }
+        }
+
+        function showModal(title, desc) {
+            const modal = document.getElementById('modal-alert');
+            const titleEl = document.getElementById('modal-title');
+            const descEl = document.getElementById('modal-desc');
+
+            if (titleEl) titleEl.textContent = title;
+            if (descEl) descEl.textContent = desc;
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-alert');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function resetProject() {
+            project = {
+                mediaList: [],
+                bgm: 'upbeat',
+                customMusicUrl: null,
+                customMusicName: null,
+                bgmVolume: 0.7,
+                videoVolume: 1.0,
+                currentSceneIndex: 0
+            };
+            currentTime = 0;
+            totalDuration = 0;
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            renderMediaList();
+            switchStep(1);
+            showModal('초기화 완료', '프로젝트가 처음 상태로 초기화되었습니다.');
+        }
+    </script>
+</body>
+</html>
